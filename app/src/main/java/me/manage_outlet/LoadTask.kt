@@ -2,14 +2,12 @@ package me.manage_outlet
 
 import android.os.AsyncTask
 import android.util.Log
-import android.widget.EditText
-import org.json.JSONObject
 import java.io.*
 import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
 
-class LoginTask(val edtId: EditText, val edtPw: EditText) : AsyncTask<String, Void, String>(){
+class LoadTask() : AsyncTask<String, Void, String>(){
     override fun doInBackground(vararg url: String?): String {
 
         val url = URL(url[0])
@@ -17,17 +15,16 @@ class LoginTask(val edtId: EditText, val edtPw: EditText) : AsyncTask<String, Vo
         var result = ""
         try {
             //Configure
-            httpClient.requestMethod = "POST"
+            httpClient.requestMethod = "GET"
             httpClient.setRequestProperty("Cache-Control", "no-cache")
             httpClient.setRequestProperty("Content-Type", "application/json")
             httpClient.setRequestProperty("Accept", "text/html")
-            httpClient.doOutput = true
+            httpClient.doInput = true
 
             Log.d("check", "Try connect to Server...")
             httpClient.connect()
 
-            //httpClient.outputStream is mean "Create Stream".
-            writeStream(outputStream = httpClient.outputStream)
+            //httpClient.inputStream is mean "Create Stream".
             result = readStream(inputStream = httpClient.inputStream)
 
             Log.d("check","Try outputStream.close() .")
@@ -54,18 +51,6 @@ class LoginTask(val edtId: EditText, val edtPw: EditText) : AsyncTask<String, Vo
             }
         }
         return stringBuffer.toString()
-    }
-    fun writeStream(outputStream: OutputStream){
-        Log.d("check", "Entered in writeStream().")
-        val jsonObject = JSONObject()
-        jsonObject.put("id",edtId.text.toString())
-        jsonObject.put("password", edtPw.text.toString())
-        val bufferedWriter = BufferedWriter(OutputStreamWriter(outputStream))
-        Log.d("check","Try send the " + jsonObject.toString() + " to Server...")
-        bufferedWriter.write(jsonObject.toString())
-        Log.d("check","Try outputStream.flush() .")
-        bufferedWriter.flush()
-        bufferedWriter.close()
     }
 
     override fun onPostExecute(result: String?) {
