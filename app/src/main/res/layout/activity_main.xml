@@ -39,4 +39,14 @@
         app:layout_constraintStart_toStartOf="@+id/editId"
         app:layout_constraintTop_toBottomOf="@+id/editId" />
 
+    <TextView
+        android:id="@+id/textMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="44dp"
+        android:text="Please fill out."
+        app:layout_constraintBottom_toTopOf="@+id/editId"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </android.support.constraint.ConstraintLayout>
