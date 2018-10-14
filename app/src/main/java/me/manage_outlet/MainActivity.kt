@@ -1,22 +1,16 @@
 package me.manage_outlet
 
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
-import android.widget.EditText
-import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
-import org.json.JSONObject
-import java.io.*
-import java.lang.Exception
-import java.net.HttpURLConnection
-import java.net.URL
 
 class MainActivity : AppCompatActivity(){
+//    val localUrl = "https://a8274755.ngrok.io"
+    val herokuUrl = "https://get-and-post-as-json.herokuapp.com"
+    val url = herokuUrl
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -51,9 +45,7 @@ class MainActivity : AppCompatActivity(){
             override fun afterTextChanged(p0: Editable?) {}
         })
         btnLogin.setOnClickListener{
-            val localUrl = "https://6dcbc392.ngrok.io/login"
-            val herokuUrl = "https://get-and-post-as-json.herokuapp.com/login"
-            val result = LoginTask(editId, editPw, textMsg, this).execute(localUrl).get()
+            val result = LoginTask(editId, editPw).execute(url + "/login").get()
             when(result){
                 "Login" -> loginWelcome()
                 "Wrong id" -> textMsg.text = result
@@ -65,6 +57,8 @@ class MainActivity : AppCompatActivity(){
     fun loginWelcome(){
         textMsg.text = "Welcome"
         val intent = Intent(this, ManageActivity::class.java)
+        intent.putExtra("id",editId.text.toString())
+        intent.putExtra("url",url)
         startActivity(intent)
     }
 }

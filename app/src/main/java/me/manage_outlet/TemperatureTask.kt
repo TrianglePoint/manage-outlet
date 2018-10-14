@@ -2,14 +2,13 @@ package me.manage_outlet
 
 import android.os.AsyncTask
 import android.util.Log
-import android.widget.EditText
 import org.json.JSONObject
 import java.io.*
 import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
 
-class LoginTask(val edtId: EditText, val edtPw: EditText) : AsyncTask<String, Void, String>(){
+class TemperatureTask(val name: String, val min: String, val max: String) : AsyncTask<String, Void, String>(){
     override fun doInBackground(vararg url: String?): String {
 
         val url = URL(url[0])
@@ -58,8 +57,9 @@ class LoginTask(val edtId: EditText, val edtPw: EditText) : AsyncTask<String, Vo
     fun writeStream(outputStream: OutputStream){
         Log.d("check", "Entered in writeStream().")
         val jsonObject = JSONObject()
-        jsonObject.put("id",edtId.text.toString())
-        jsonObject.put("password", edtPw.text.toString())
+        jsonObject.put("name", name)
+        jsonObject.put("min", min)
+        jsonObject.put("max", max)
         val bufferedWriter = BufferedWriter(OutputStreamWriter(outputStream))
         Log.d("check","Try send the " + jsonObject.toString() + " to Server...")
         bufferedWriter.write(jsonObject.toString())
