@@ -1,87 +1,90 @@
 package me.manage_outlet
 
-import android.os.AsyncTask
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
-import android.widget.EditText
+import android.text.Editable
+import android.text.TextWatcher
 import kotlinx.android.synthetic.main.activity_main.*
-import org.json.JSONObject
-import java.io.*
-import java.lang.Exception
-import java.net.HttpURLConnection
-import java.net.URL
 
 class MainActivity : AppCompatActivity(){
+//    val localUrl = ""
+    val herokuUrl = "https://get-and-post-as-json.herokuapp.com"
+    val url = herokuUrl
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        btnLogin.setOnClickListener{LoginTask(editId).execute()}
-    }
-}
+        var checkFillout = arrayOf(0, 0)
 
-class LoginTask(val edt: EditText) : AsyncTask<String, Void, String>(){
-    override fun doInBackground(vararg p0: String?): String {
-        val url = URL("https://get-and-post-as-json.herokuapp.com/")
-        val httpClient = url.openConnection() as HttpURLConnection
-        var result = ""
-        try {
-            //Configure
-            httpClient.requestMethod = "POST"
-            httpClient.setRequestProperty("Cache-Control", "no-cache")
-            httpClient.setRequestProperty("Content-Type", "application/json")
-            httpClient.setRequestProperty("Accept", "text/html")
-//            httpClient.doInput = true
-            httpClient.doOutput = true
+        // First, unable login button.
+        btnLogin.isEnabled = false
+        editId.addTextChangedListener(object:TextWatcher{
 
-            Log.d("check", "Try connect to Server...")
-            httpClient.connect()
+            // Fill out Id.
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
-            //httpClient.outputStream is mean "Create Stream".
-            writeStream(outputStream = httpClient.outputStream)
-            result = readStream(inputStream = httpClient.inputStream)
-//            httpClient.responseCode
+                // If did fill out?
+                when(editId.text.toString().length){
+                    0 -> checkFillout[0] = 0
+                    else -> checkFillout[0] = 1
+                }
 
-            Log.d("check","Try outputStream.close() .")
-        }catch (e: Exception){
-            e.printStackTrace()
-            Log.d("check", "EXCEPTION : " + e.printStackTrace().toString())
-        }finally {
-            httpClient.disconnect()
-            Log.d("check", "Disconnected on Server.")
-        }
-        return result
-    }
-    fun readStream(inputStream: InputStream): String{
-        val bufferedReader: BufferedReader = BufferedReader(InputStreamReader(inputStream))
-        val stringBuffer = StringBuffer()
-        var responeResult : String? = ""
+                // If did fill out the all, enable login button.
+                when(checkFillout[0] == 1 && checkFillout[1] == 1){
+                    true -> btnLogin.isEnabled = true
+                    else -> btnLogin.isEnabled = false
+                }
+            }
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun afterTextChanged(p0: Editable?) {}
+        })
+        editPw.addTextChangedListener(object:TextWatcher{
 
-        while(true) {
-            responeResult = bufferedReader.readLine()
-            if(responeResult != null){
-                stringBuffer.append(responeResult)
-            }else{
-                break
+            // Fill out Password.
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+                // If did fill out?
+                when(editPw.text.toString().length){
+                    0 -> checkFillout[1] = 0
+                    else -> checkFillout[1] = 1
+                }
+
+                // If did fill out the all, enable login button.
+                when(checkFillout[0] == 1 && checkFillout[1] == 1){
+                    true -> btnLogin.isEnabled = true
+                    else -> btnLogin.isEnabled = false
+                }
+            }
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun afterTextChanged(p0: Editable?) {}
+        })
+
+        // Click Login button.
+        btnLogin.setOnClickListener{
+
+            // Communicate with Server.
+            val result = LoginTask(editId, editPw).execute(url + "/login").get()
+
+            // and when confirmed, run intent of loginWelcome().
+            when(result){
+                "Login" -> loginWelcome()
+                "Wrong id" -> textMsg.text = result
+                "Wrong password" -> textMsg.text = result
+                else -> textMsg.text = "What..."
             }
         }
-        return stringBuffer.toString()
     }
-    fun writeStream(outputStream: OutputStream){
-        Log.d("check", "Entered in writeStream().")
-        val jsonObject = JSONObject()
-        jsonObject.put("id",edt.text.toString())
-        val bufferedWriter = BufferedWriter(OutputStreamWriter(outputStream))
-        Log.d("check","Try send the " + jsonObject.toString() + "to Server...")
-        bufferedWriter.write(jsonObject.toString())
-        Log.d("check","Try outputStream.flush() .")
-        bufferedWriter.flush()
-        bufferedWriter.close()
-    }
+    fun loginWelcome(){
+        textMsg.text = "Welcome"
+        val intent = Intent(this, ManageActivity::class.java)
 
-    override fun onPostExecute(result: String?) {
-        super.onPostExecute(result)
-        Log.d("check","result: " + result)
-        edt.setText(result)
+        // it is used to "hi, id" on next activity.
+        intent.putExtra("id",editId.text.toString())
+
+        // it is used to communicate with server on next activity.
+        intent.putExtra("url",url)
+        startActivity(intent)
     }
 }
+
