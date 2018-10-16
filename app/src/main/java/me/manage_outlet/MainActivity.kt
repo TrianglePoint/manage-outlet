@@ -8,9 +8,9 @@ import android.text.TextWatcher
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(){
-//    val localUrl = ""
+    val localUrl = "http://192.168.1.4:3000"
     val herokuUrl = "https://get-and-post-as-json.herokuapp.com"
-    val url = herokuUrl
+    var url = ""
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -62,6 +62,11 @@ class MainActivity : AppCompatActivity(){
 
         // Click Login button.
         btnLogin.setOnClickListener{
+            if(radioButtonHeroku.isChecked){
+                url = herokuUrl
+            }else{
+                url = localUrl
+            }
 
             // Communicate with Server.
             val result = LoginTask(editId, editPw).execute(url + "/login").get()
@@ -69,9 +74,10 @@ class MainActivity : AppCompatActivity(){
             // and when confirmed, run intent of loginWelcome().
             when(result){
                 "Login" -> loginWelcome()
-                "Wrong id" -> textMsg.text = result
-                "Wrong password" -> textMsg.text = result
-                else -> textMsg.text = "What..."
+
+                // "" is if none receive the text or fail connect to server.
+                "" -> textMsg.text = "What..."
+                else -> textMsg.text = result
             }
         }
     }
